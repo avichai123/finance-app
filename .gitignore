@@ -1,0 +1,14 @@
+# התיקיה של חבילות npm
+node_modules/
+
+# קבצי לוגים
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# תיקיות build/output
+dist/
+build/
+
+# משתנים מקומיים
+.env
