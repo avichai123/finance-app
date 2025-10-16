@@ -66,7 +66,33 @@ const addTransaction = async(req , res) => {
 }
 
 const removeTransaction = async(req , res) => {
+    const { id } = req.params;
+    const t = await sequelize.transaction();
+    try{
+        if(!id){
+            await t.rollback();
+            return res.status(409).json({message:'Missing id'});
+        }
 
+        const transaction = await Transaction.findByPk(id , {transaction:t});
+
+        if(!transaction){
+            await t.rollback();
+            return res.status(404).json({message:'Transaction not found'});
+        }
+
+        await Installment.destroy({
+            where:{ transactionId:id },
+            transaction:t
+        });
+
+        await transaction.destroy({transaction:t});
+
+        await t.commit();
+        res.status(200).json({message:'Transaction deleted successfully'});
+    }catch(error){
+        res.status(500).json({message:error.message});
+    }
 }
 
 const getAllTransactionByMonth = async(req , res) => {
