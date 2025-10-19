@@ -11,7 +11,6 @@ export default function Register() {
   const [error , setError] = useState('');
 
   const handleRegister = async () => {
-    // console.log("Registering:", phone, password, name);
     try{
       await register(phone , name , password);
       router.push("/login"); 

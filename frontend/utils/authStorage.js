@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {jwtDecode} from 'jwt-decode';
 
 export const storeUserDetails = async(token , user) =>{
     try{
@@ -12,6 +13,17 @@ export const storeUserDetails = async(token , user) =>{
 export const getUserToken = async() => {
     try {
         const token = await AsyncStorage.getItem('userToken');
+
+        if(!token) return null;
+
+        const decode = jwtDecode(token);
+        const now = Date.now() / 1000;
+
+        if(decode.exp && decode.exp < now){
+            await AsyncStorage.removeItem('userToken');
+            await AsyncStorage.removeItem('userDetails');
+            return null;
+        }
         return token;
     }catch(error){
         console.error(error);
