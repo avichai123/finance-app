@@ -1,51 +1,79 @@
-import { useState } from "react";
-import { View, Text, Button, TouchableOpacity, StyleSheet } from "react-native";
-import InstallmentsList from "./InstallmentsList";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
 export default function TransactionItem({ item, onDelete }) {
-  const [expanded, setExpanded] = useState(false);
-
   return (
-    <View style={styles.transaction}>
-      <Text style={styles.type}>
-        {item.type}: {item.amount}₪
-      </Text>
-      <Text>{new Date(item.date).toLocaleDateString()}</Text>
-      <Text>קטגוריה: {item.category}</Text>
-      <Text>הערה: {item.notes}</Text>
+    <View style={[styles.card, item.type === "תשלום" && styles.installmentCard]}>
+      <View>
+        <Text style={styles.category}>{item.title}</Text>
+        <Text style={styles.notes}>{item.notes}</Text>
+        <Text style={styles.date}>
+          {new Date(item.date).toLocaleDateString("he-IL")}
+        </Text>
+      </View>
 
-      {item.hasInstallments && (
-        <>
-          <TouchableOpacity onPress={() => setExpanded(!expanded)}>
-            <Text style={styles.toggleBtn}>
-              {expanded ? "הסתר תשלומים ▲" : "הצג תשלומים ▼"}
-            </Text>
-          </TouchableOpacity>
-
-          {expanded && (
-            <InstallmentsList installments={item.installments} />
-          )}
-        </>
-      )}
-
-      <Button title="מחק" color="red" onPress={() => onDelete(item.id)} />
+      <View style={styles.rightSection}>
+        <Text
+          style={[
+            styles.amount,
+            item.type === "תשלום" ? styles.installmentAmount : styles.transactionAmount,
+          ]}
+        >
+          ₪{item.amount}
+        </Text>
+        <Text style={styles.typeTag}>
+          {item.type === "תשלום" ? "תשלום" : "עסקה"}
+        </Text>
+        <TouchableOpacity onPress={() => onDelete(item.id)}>
+          <Text style={styles.delete}>🗑️</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  transaction: {
+  card: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: "#f9f9f9",
+    borderRadius: 12,
     padding: 15,
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 10,
-    backgroundColor: "#f9f9f9",
   },
-  type: { fontWeight: "bold" },
-  toggleBtn: {
+  installmentCard: {
+    backgroundColor: "#f0f8ff",
+  },
+  category: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  notes: {
+    fontSize: 14,
+    color: "#555",
+  },
+  date: {
+    fontSize: 13,
+    color: "#999",
+  },
+  rightSection: {
+    alignItems: "flex-end",
+  },
+  amount: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  installmentAmount: {
     color: "#007AFF",
-    marginTop: 8,
-    fontWeight: "600",
+  },
+  transactionAmount: {
+    color: "#E63946",
+  },
+  typeTag: {
+    fontSize: 12,
+    color: "#666",
+  },
+  delete: {
+    marginTop: 5,
+    fontSize: 18,
   },
 });

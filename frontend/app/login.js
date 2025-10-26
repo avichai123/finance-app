@@ -8,14 +8,16 @@ import { authenticateWithFaceId } from "../utils/biometricAuth";
 export default function Login() {
   const router = useRouter();
   const [phone, setPhone] = useState("");
+  const [loading , setLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [showPasswordLogin, setShowPasswordLogin] = useState(false); // 🔹 מצב למעבר בין Face ID לסיסמה
 
   const handleLogin = async () => {
     try {
+      setLoading(true);
       const details = await login(phone, password);
       await storeUserDetails(details.token, details.user);
+      setLoading(false);
       router.replace("/transaction");
     } catch (error) {
       setError(error.message);
@@ -26,7 +28,6 @@ export default function Login() {
     const hasSession = await getUserToken();
     if (!hasSession) {
       Alert.alert("No session found", "Please log in with your password first.");
-      setShowPasswordLogin(true);
       return;
     }
 
@@ -39,7 +40,7 @@ export default function Login() {
         "You can try again or use your password instead.",
         [
           { text: "Try Again", onPress: handleFaceId },
-          { text: "Use Password", onPress: () => setShowPasswordLogin(true) },
+          { text: "Use Password", },
         ]
       );
     }
@@ -48,9 +49,6 @@ export default function Login() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
-      
-      {showPasswordLogin ? (
-        <>
           <TextInput
             placeholder="Phone"
             style={styles.input}
@@ -65,23 +63,21 @@ export default function Login() {
             onChangeText={setPassword}
             secureTextEntry
           />
-          <Button title="Login" onPress={handleLogin} />
+        {loading ? (
+          <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={styles.loadingText}>Logging in...</Text>
+          </View>
+          ) : (
+         <Button title="Login" onPress={handleLogin} />
+        )}
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
-        </>
-      ) : (
-        <>
+
           <TouchableOpacity style={styles.faceIdBtn} onPress={handleFaceId}>
             <Image source={require("../assets/Face_ID.webp")} style={styles.faceIcon} />
             <Text style={styles.faceText}>Login with Face ID</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => setShowPasswordLogin(true)}>
-            <Text style={styles.altLoginText}>Use password instead</Text>
-          </TouchableOpacity>
-        </>
-      )}
-
       <TouchableOpacity onPress={() => router.push("/register")}>
         <Text style={styles.registerText}>
           Don’t have an account?{" "}
@@ -104,7 +100,7 @@ const styles = StyleSheet.create({
   },
   error: { fontSize: 16, color: "red", textAlign: "center", marginVertical: 10 },
 
-  // Face ID button
+  
   faceIdBtn: {
     flexDirection: "row",
     alignItems: "center",

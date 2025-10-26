@@ -49,7 +49,7 @@ const addTransaction = async(req , res) => {
             }
 
            const createdInstallment = await Installment.bulkCreate(installments , {transaction:t});
-           firstInstallment = createdInstallment[0];
+           firstInstallment = createdInstallment;
     }
 
     await t.commit();
@@ -104,9 +104,7 @@ const getAllTransactionByMonth = async(req , res) => {
 
         const transactions = await getAllTransaction(month , year);
 
-        const formattedTransactions = formattedTransactionsService(transactions , month , year);
-
-        res.status(200).json(formattedTransactions);
+        res.status(200).json(transactions);
     }catch(error){
         res.status(500).json({message:error.message});
     }
